@@ -111,12 +111,14 @@ def update_weights(neg_examples, pos_examples, w_current):
         activation = this_case.dot(w)
         if (activation >= 0):
             # YOUR CODE HERE
+            w += np.array([this_case]).T * (0 - 1)
 
     for i in range(pos_examples.shape[0]):
         this_case = pos_examples[i]
         activation = this_case.dot(w)
         if (activation < 0):
             # YOUR CODE HERE
+            w += np.array([this_case]).T * (1 - 0)
 
     return w
 
