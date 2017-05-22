@@ -146,7 +146,17 @@ def train(epochs):
 
             # HIDDEN LAYER
             # FILL IN CODE. Replace the line below by one of the options.
-            embed_to_hid_weights_gradient = np.zeros((numhid1 * numwords, numhid2))
+            # embed_to_hid_weights_gradient = np.zeros((numhid1 * numwords, numhid2))
+
+            """
+            embed_to_hid_weights_gradient: (numhid1 * numwords, numhid2)
+            ----
+            back_propagated_deriv_1: 
+                (numhid2, vocab_size) * (vocab_size, batchsize) * (numhid2, batchsize) * (numhid2, batchsize)
+                = (numhid2, batchsize) * (numhid2, batchsize) * (numhid2, batchsize)
+                = (numhid2, batchsize)
+            embedding_layer_state: (numhid1 * numwords, batchsize)
+            """
 
             # Options:
             # (a)
@@ -154,8 +164,8 @@ def train(epochs):
             #    np.transpose(back_propagated_deriv_1), embedding_layer_state)
 
             # (b)
-            # embed_to_hid_weights_gradient = np.dot(embedding_layer_state,
-            #                             np.transpose(back_propagated_deriv_1))
+            embed_to_hid_weights_gradient = np.dot(embedding_layer_state,
+                                        np.transpose(back_propagated_deriv_1))
 
             # (c)
             # embed_to_hid_weights_gradient = back_propagated_deriv_1
@@ -165,11 +175,17 @@ def train(epochs):
 
 
             # FILL IN CODE. Replace the line below by one of the options.
-            hid_bias_gradient = np.zeros((numhid2, 1))
+            # hid_bias_gradient = np.zeros((numhid2, 1))
+
+            """
+            hid_bias_gradient: (numhid2, 1)
+            ----
+            back_propagated_deriv_1: (numhid2, batchsize)
+            """
 
             # Options
             # (a)
-            # hid_bias_gradient = np.sum(back_propagated_deriv_1, axis=1)
+            hid_bias_gradient = np.sum(back_propagated_deriv_1, axis=1)
 
             # (b)
             # hid_bias_gradient = np.sum(back_propagated_deriv_1, axis=0)
@@ -184,12 +200,19 @@ def train(epochs):
 
 
             # FILL IN CODE. Replace the line below by one of the options.
-            back_propagated_deriv_2 = np.zeros((numhid2, batchsize))
+            # back_propagated_deriv_2 = np.zeros((numhid2, batchsize))
+
+            """
+            back_propagated_deriv_2: (numwords * numhid1, batchsize)
+            ----
+            embed_to_hid_weights: (numwords * numhid1, numhid2)
+            back_propagated_deriv_1: (numhid2, batchsize)
+            """
 
             # Options
             # (a)
-            # back_propagated_deriv_2 = np.dot(embed_to_hid_weights,
-            #                                     back_propagated_deriv_1)
+            back_propagated_deriv_2 = np.dot(embed_to_hid_weights,
+                                                back_propagated_deriv_1)
 
             # (b)
             # back_propagated_deriv_2 = np.dot(back_propagated_deriv_1,
@@ -400,7 +423,11 @@ def fprop(input_batch, word_embedding_weights, embed_to_hid_weights,
 
     # Apply logistic activation function
     # FILL IN CODE. Replace the line below by one of the options.
-    hidden_layer_state = np.zeros((numhid2, batchsize))
+    # hidden_layer_state = np.zeros((numhid2, batchsize))
+
+    """
+    sigma(x) = 1 / (1 + e^-x)
+    """
 
     # Options
     # (a)
@@ -410,7 +437,7 @@ def fprop(input_batch, word_embedding_weights, embed_to_hid_weights,
     # hidden_layer_state = 1 / (1 - np.exp(-inputs_to_hidden_units))
 
     # (c)
-    # hidden_layer_state = 1 / (1 + np.exp(-inputs_to_hidden_units))
+    hidden_layer_state = 1 / (1 + np.exp(-inputs_to_hidden_units))
 
     # (d)
     # hidden_layer_state = -1 / (1 + np.exp(-inputs_to_hidden_units))
@@ -419,14 +446,26 @@ def fprop(input_batch, word_embedding_weights, embed_to_hid_weights,
     # COMPUTE STATE OF OUTPUT LAYER
     # Compute inputs to softmax
     # FILL IN CODE. Replace the line below by one of the options.
-    inputs_to_softmax = np.zeros((vocab_size, batchsize))
+    # inputs_to_softmax = np.zeros((vocab_size, batchsize))
+
+    """
+    hid_to_output_weights: (numhid2, vocab_size)
+    hidden_layer_state: (numhid2, batchsize)
+    output_bias: (vocab_size, 1)
+    ----
+    inputs_to_softmax: 
+        (numhid2, vocab_size).T * (numhid2, batchsize) = (vocab_size, batchsize)
+    ----
+    output_bias_tmp: 
+        (vocab_size, 1) => (vocab_size, batchsize)
+    """
 
     # Options
     # (a)
-    # inputs_to_softmax = np.dot(np.transpose(hid_to_output_weights),
-    #                             hidden_layer_state)
-    # output_bias_tmp = np.tile(output_bias,(1,batchsize))
-    # inputs_to_softmax = inputs_to_softmax + output_bias_tmp
+    inputs_to_softmax = np.dot(np.transpose(hid_to_output_weights),
+                                hidden_layer_state)
+    output_bias_tmp = np.tile(output_bias,(1,batchsize))
+    inputs_to_softmax = inputs_to_softmax + output_bias_tmp
 
     # (b)
     # inputs_to_softmax = np.dot(np.transpose(hid_to_output_weights),
