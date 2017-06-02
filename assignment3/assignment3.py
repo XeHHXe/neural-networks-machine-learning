@@ -20,8 +20,8 @@ def a3(wd_coefficient, n_hid, n_iters, learning_rate,
     test_data['targets'] = from_data_file[0][0]['test'][0][0]['targets']
 
     n_training_cases = training_data['inputs'].shape[1]
-    if n_iters != 0:
-        test_gradient(model, training_data, wd_coefficient)
+    # if n_iters != 0:
+    #     test_gradient(model, training_data, wd_coefficient)
 
     # Optimization
     theta = model_to_theta(model)
@@ -63,9 +63,9 @@ def a3(wd_coefficient, n_hid, n_iters, learning_rate,
                 ' training data loss is', training_data_losses[-1],
                 ', and validation data loss is ', validation_data_losses[-1])
 
-    if n_iters != 0:
-        # check again, this time with more typical parameters
-        test_gradient(model, training_data, wd_coefficient)
+    # if n_iters != 0:
+    #     # check again, this time with more typical parameters
+    #     test_gradient(model, training_data, wd_coefficient)
 
     if do_early_stopping:
         print('Early stopping: validation loss was lowest after ',
@@ -245,9 +245,21 @@ def d_loss_by_d_model(model, data, wd_coefficient):
     # it just returns a lot of zeros, which is obviously not the correct
     # output. Your job is to replace that by a correct computation.
 
+    hid_input = np.dot(model['input_to_hid'], data['inputs'])
+    hid_output = logistic(hid_input)
+    class_input = np.dot(model['hid_to_class'], hid_output)
+    class_normalizer = log_sum_exp_over_rows(class_input)
+    log_class_prob = class_input - \
+                     np.tile(class_normalizer, (class_input.shape[0], 1))
+    class_prob = np.exp(log_class_prob)
+
+    delta_3 = class_prob - data['targets']
+    delta_2 = np.dot(model['hid_to_class'].T, delta_3) * (hid_output * (1.0 - hid_output))
+
     ret = {}
-    ret['input_to_hid'] = model['input_to_hid'] * 0
-    ret['hid_to_class'] = model['hid_to_class'] * 0
+    m = data['inputs'].shape[1]
+    ret['hid_to_class'] = (1.0 / m) * np.dot(delta_3, hid_output.T) + wd_coefficient * model['hid_to_class']
+    ret['input_to_hid'] = (1.0 / m) * np.dot(delta_2, data['inputs'].T) + wd_coefficient * model['input_to_hid']
 
     return ret
 
@@ -320,6 +332,6 @@ def classification_performance(model, data):
 
 # -----
 # Main program
-a3(wd_coefficient = 0, n_hid = 0, n_iters = 0, learning_rate = 0,
-        momentum_multiplier = 0, do_early_stopping = False, mini_batch_size = 0)
+a3(wd_coefficient = 0, n_hid = 10, n_iters = 70, learning_rate = 0.005,
+        momentum_multiplier = 0, do_early_stopping = False, mini_batch_size = 4)
 
