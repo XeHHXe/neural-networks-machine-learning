@@ -332,6 +332,36 @@ def classification_performance(model, data):
 
 # -----
 # Main program
-a3(wd_coefficient = 0, n_hid = 10, n_iters = 70, learning_rate = 0.005,
+a3(wd_coefficient = 0, n_hid = 10, n_iters = 70, learning_rate = 0.5,
         momentum_multiplier = 0, do_early_stopping = False, mini_batch_size = 4)
+
+# momentum
+learning_rates = [0.002, 0.01, 0.05, 0.2, 1.0, 5.0, 20.0]
+momentums = [0.0, 0.9]
+for l in learning_rates:
+    for m in momentums:
+        print ("learning rate =", l, " momentum =", m)
+        a3(0, 10, 70, l, m, False, 4)
+
+# early stopping
+a3(0, 200, 1000, 0.35, 0.9, False, 100)
+a3(0, 200, 1000, 0.35, 0.9, True, 100)
+
+# weight decay
+wds = [0, 0.0001, 0.001, 0.01, 1, 5]
+for wd in wds:
+    print ("weight decay =", wd)
+    a3(wd, 200, 1000, 0.35, 0.9, False, 100)
+
+# nodes
+nodes = [10, 30, 100, 130, 170]
+for n in nodes:
+    print ("hidden layer nodes =", n)
+    a3(0.001, n, 1000, 0.35, 0.9, False, 100)
+
+# nodes + early stopping
+nodes = [18, 37, 83, 113, 236]
+for n in nodes:
+    print ("hidden layer nodes =", n)
+    a3(0.001, n, 1000, 0.35, 0.9, True, 100)
 
