@@ -7,7 +7,7 @@ def a4_rand(requested_size, seed):
     Array sizes are requested_size, seed - some pseudo-random initializer
     '''
     requested_size = list(requested_size)
-    start_i = round(seed) % round(randomness_source.shape[1] / 10) + 1
+    start_i = int(round(seed) % round(randomness_source.shape[1] / 10) + 1)
     if start_i + np.prod(requested_size) >= randomness_source.shape[1] + 1:
         exit('a4_rand failed to generate an array of that size (too big)')
     ret = np.reshape(randomness_source[:,start_i-1:start_i + \
