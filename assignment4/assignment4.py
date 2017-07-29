@@ -171,11 +171,14 @@ def configuration_goodness(rbm_w, visible_state, hidden_state):
     # <number of configurations that we're handling in parallel>.
     # This returns a scalar: the mean over cases of the goodness (negative energy)
     # of the described configurations.
-    goodnesses = []
-    configurations = visible_state.shape[1]
-    for conf in range(configurations):
-        goodnesses.append(np.dot(np.dot(rbm_w, visible_state[:,conf]), hidden_state[:,conf]))
-    return np.mean(goodnesses)
+
+    # goodnesses = []
+    # configurations = visible_state.shape[1]
+    # for conf in range(configurations):
+    #     goodnesses.append(np.dot(np.dot(rbm_w, visible_state[:,conf]), hidden_state[:,conf]))
+    # return np.mean(goodnesses)
+
+    return np.mean(np.sum(np.dot(rbm_w, visible_state) * hidden_state, axis=0))
 
 def configuration_goodness_gradient(visible_state, hidden_state):
     # <visible_state> is a binary matrix of size <number of visible units> by
@@ -190,11 +193,14 @@ def configuration_goodness_gradient(visible_state, hidden_state):
     # shape as the model parameters, which by the way are not provided to this
     # function. Notice that we're talking about the mean over data cases
     # (as opposed to the sum over data cases).
-    gradients = []
-    configurations = visible_state.shape[1]
-    for conf in range(configurations):
-        gradients.append(np.array([hidden_state[:,conf]]).T * visible_state[:,conf])
-    return np.mean(gradients, axis=0)
+
+    # gradients = []
+    # configurations = visible_state.shape[1]
+    # for conf in range(configurations):
+    #     gradients.append(np.array([hidden_state[:,conf]]).T * visible_state[:,conf])
+    # return np.mean(gradients, axis=0)
+
+    return np.dot(hidden_state, visible_state.T) / visible_state.shape[1]
 
 def hidden_state_to_visible_probabilities(rbm_w, hidden_state):
     # <rbm_w> is a matrix of size <number of hidden units> by
@@ -228,7 +234,7 @@ def a4_main(n_hid, lr_rbm, lr_classification, n_iterations):
                      training_data, lr_rbm, n_iterations)
     # rbm_w is now a weight matrix of <n_hid> by
     # <number of visible units, i.e. 256>
-    show_rbm(rbm_w)
+    # show_rbm(rbm_w)
 
     input_to_hid = rbm_w
     # calculate the hidden layer representation of the labeled data
@@ -341,3 +347,17 @@ describe_matrix(configuration_goodness_gradient(data_37_cases, test_hidden_state
 describe_matrix(cd1(test_rbm_w, data_1_case))
 describe_matrix(cd1(test_rbm_w, data_10_cases))
 describe_matrix(cd1(test_rbm_w, data_37_cases))
+
+# Part 3 - RBM as feedforward network
+a4_main(300, .02, .005, 1000)
+
+for lr in np.linspace(0.05, 0.15, 10):
+    print('Learning rate:', lr)
+    a4_main(300, .02, lr, 1000)
+
+# http://www.hankcs.com/ml/nnml-rbm.html
+w = small_test_rbm_w
+# generate all possible states of hidden units (10 here => 2^10 states)
+dec_2_bin = lambda x, n_bits: np.array(["{0:b}".format(val).zfill(n_bits) for val in x])
+binary = np.array([list(val) for val in dec_2_bin(range(pow(2, np.size(w, 0))), np.size(w, 0))], dtype=float)
+print(np.log(np.sum(np.prod((np.exp(np.dot(binary, w)) + 1).T, axis=0))))
