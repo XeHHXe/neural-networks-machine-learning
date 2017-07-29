@@ -157,7 +157,11 @@ def configuration_goodness(rbm_w, visible_state, hidden_state):
     # <number of configurations that we're handling in parallel>.
     # This returns a scalar: the mean over cases of the goodness (negative energy)
     # of the described configurations.
-    exit("Not yet implemented")
+    goodnesses = []
+    configurations = visible_state.shape[1]
+    for conf in range(configurations):
+        goodnesses.append(np.dot(np.dot(rbm_w, visible_state[:,conf]), hidden_state[:,conf]))
+    return np.mean(goodnesses)
 
 def configuration_goodness_gradient(visible_state, hidden_state):
     # <visible_state> is a binary matrix of size <number of visible units> by
@@ -172,7 +176,11 @@ def configuration_goodness_gradient(visible_state, hidden_state):
     # shape as the model parameters, which by the way are not provided to this
     # function. Notice that we're talking about the mean over data cases
     # (as opposed to the sum over data cases).
-    exit("Not yet implemented")
+    gradients = []
+    configurations = visible_state.shape[1]
+    for conf in range(configurations):
+        gradients.append(np.array([hidden_state[:,conf]]).T * visible_state[:,conf])
+    return np.mean(gradients, axis=0)
 
 def hidden_state_to_visible_probabilities(rbm_w, hidden_state):
     # <rbm_w> is a matrix of size <number of hidden units> by
@@ -183,7 +191,7 @@ def hidden_state_to_visible_probabilities(rbm_w, hidden_state):
     # <number of configurations that we're handling in parallel>.
     # This takes in the (binary) states of the hidden units, and returns the
     # activation probabilities of the visible units, conditional on those states.
-    exit("Not yet implemented")
+    return logistic(np.dot(rbm_w.T, hidden_state))
 
 def visible_state_to_hidden_probabilities(rbm_w, visible_state):
     # <rbm_w> is a matrix of size <number of hidden units> by
@@ -194,7 +202,7 @@ def visible_state_to_hidden_probabilities(rbm_w, visible_state):
     # <number of configurations that we're handling in parallel>.
     # This takes in the (binary) states of the visible units, and returns the
     # activation probabilities of the hidden units conditional on those states.
-    exit("Not yet implemented")
+    return logistic(np.dot(rbm_w, visible_state))
 
 def a4_main(n_hid, lr_rbm, lr_classification, n_iterations):
     # first, train the rbm
@@ -299,3 +307,19 @@ del temp
 
 # Part 2 - Main part
 a4_main(300, 0, 0, 0)
+
+describe_matrix(visible_state_to_hidden_probabilities(test_rbm_w, data_1_case))
+describe_matrix(visible_state_to_hidden_probabilities(test_rbm_w, data_10_cases))
+describe_matrix(visible_state_to_hidden_probabilities(test_rbm_w, data_37_cases))
+
+describe_matrix(hidden_state_to_visible_probabilities(test_rbm_w, test_hidden_state_1_case))
+describe_matrix(hidden_state_to_visible_probabilities(test_rbm_w, test_hidden_state_10_cases))
+describe_matrix(hidden_state_to_visible_probabilities(test_rbm_w, test_hidden_state_37_cases))
+
+print(configuration_goodness(test_rbm_w, data_1_case, test_hidden_state_1_case))
+print(configuration_goodness(test_rbm_w, data_10_cases, test_hidden_state_10_cases))
+print(configuration_goodness(test_rbm_w, data_37_cases, test_hidden_state_37_cases))
+
+describe_matrix(configuration_goodness_gradient(data_1_case, test_hidden_state_1_case))
+describe_matrix(configuration_goodness_gradient(data_10_cases, test_hidden_state_10_cases))
+describe_matrix(configuration_goodness_gradient(data_37_cases, test_hidden_state_37_cases))
