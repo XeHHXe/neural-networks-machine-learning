@@ -146,7 +146,21 @@ def cd1(rbm_w, visible_data):
     # of size <number of visible units> by <number of data cases>
     # The returned value is the gradient approximation produced by CD-1.
     # It's of the same shape as <rbm_w>.
-    exit("Not yet implemented")
+    visible_state = sample_bernoulli(visible_data)
+
+    hidden_prob = visible_state_to_hidden_probabilities(rbm_w, visible_state)
+    new_hidden_state = sample_bernoulli(hidden_prob)
+    positive_grad = configuration_goodness_gradient(visible_state, new_hidden_state)
+
+    visible_prob = hidden_state_to_visible_probabilities(rbm_w, new_hidden_state)
+    new_visible_state = sample_bernoulli(visible_prob)
+    new_hidden_prob = visible_state_to_hidden_probabilities(rbm_w, new_visible_state)
+    # new_2_hidden_state = sample_bernoulli(new_hidden_prob)
+
+    # negative_grad = configuration_goodness_gradient(new_visible_state, new_2_hidden_state)
+    negative_grad = configuration_goodness_gradient(new_visible_state, new_hidden_prob)
+
+    return positive_grad - negative_grad
 
 def configuration_goodness(rbm_w, visible_state, hidden_state):
     # <rbm_w> is a matrix of size <number of hidden units> by
@@ -323,3 +337,7 @@ print(configuration_goodness(test_rbm_w, data_37_cases, test_hidden_state_37_cas
 describe_matrix(configuration_goodness_gradient(data_1_case, test_hidden_state_1_case))
 describe_matrix(configuration_goodness_gradient(data_10_cases, test_hidden_state_10_cases))
 describe_matrix(configuration_goodness_gradient(data_37_cases, test_hidden_state_37_cases))
+
+describe_matrix(cd1(test_rbm_w, data_1_case))
+describe_matrix(cd1(test_rbm_w, data_10_cases))
+describe_matrix(cd1(test_rbm_w, data_37_cases))
